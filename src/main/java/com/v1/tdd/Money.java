@@ -2,7 +2,7 @@ package com.v1.tdd;
 
 import java.util.Objects;
 
-public abstract class Money {
+public class Money implements Expressions {
     protected Integer amount;
     protected String currency;
 
@@ -12,24 +12,42 @@ public abstract class Money {
     }
 
     @Override
+    public String toString() {
+        return "Money{" +
+                "amount=" + amount +
+                ", currency='" + currency + '\'' +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
         Money money = (Money) o;
-        return Objects.equals(amount, money.amount);
+        return Objects.equals(amount, money.amount) && this.currency.equals(((Money) o).currency);
     }
 
     public static Money dollar(Integer amount){
-        return new Dollar(amount, "USD");
+        return new Money(amount, "USD");
     }
 
     public static Money franc(Integer amount){
-        return new Franc(amount, "CHF");
+        return new Money(amount, "CHF");
     }
 
-    abstract Money times(Integer multiplier);
+    public Expressions times(Integer multiplier) {
+        return new Money(this.amount * multiplier, currency);
+    }
 
     public String currency(){
         return currency;
+    }
+
+    public Expressions plus(Expressions addend) {
+        return new Sum(this, addend);
+    }
+
+    public Money reduce(Bank bank, String to){
+        Integer rate = bank.rate(this.currency, to);
+        return new Money(amount / rate, to);
     }
 }
